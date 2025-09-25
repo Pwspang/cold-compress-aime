@@ -168,6 +168,19 @@ transformer_configs = {
         norm_eps=1e-6,
         max_length=32768,
     ),
+    "DeepSeek-R1-Distill-Qwen14B": dict(
+        block_size=131072,
+        n_layer=48,
+        n_head=40,
+        n_local_heads=8,
+        dim=5120,
+        intermediate_size=13824,
+        vocab_size=152064,
+        rope_base=1000000,
+        attention_bias=True,
+        norm_eps=1e-6,
+        max_length=131072,
+    ),
 }
 
 
