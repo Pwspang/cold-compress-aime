@@ -4,13 +4,14 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 import os
+import platform
 from typing import List, Optional
 
 import torch
 import torch.distributed as dist
 from torch import nn
 
-if os.uname().sysname != "Darwin":
+if platform.system() != "Darwin":
     from torch.distributed import _functional_collectives as funcol
 else:
     # Distributed is not supported on MacOS

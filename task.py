@@ -153,7 +153,7 @@ class LogitEvaluationTask(EvaluationTask):
         # LogitEvaluationTask will get logits instead of token predictions, so we need to process them first
         predictions = self._process_logits(predictions, split)
         return super().compute_metrics(predictions, split, dataset)
-
+            
 
 class Squality(EvaluationTask):
     DEFAULT_PROMPT_TEMPLATE = """You are given a story and a question. Answer the question in a single paragraph.
@@ -257,6 +257,39 @@ class TriviaQA(EvaluationTask):
                 context=context_str, question=question
             ),
             "labels": labels,
+        }
+
+class AIME(EvaluationTask):
+    DEFAULT_PROMPT_TEMPLATE = """Please reason step by step, and put your final answer within \\\\boxed{{}}
+====Question====
+{question}"""
+
+    def __init__(
+        self,
+        prompt_template=DEFAULT_PROMPT_TEMPLATE, max_tokens=32768, **kwargs
+    ):
+        super().__init__(
+            prompt_template,
+            max_tokens,
+            hf_args=["sea-snell/aime-2024"],
+            **kwargs
+        )
+        
+        self.metrics = {
+            "Accuracy": AutoMetric.from_name("AIME-Accuracy")
+        }
+    
+    def prepare_row(self, row:dict):
+        question = row["question"]
+        answer = row["answer"]
+        
+        prompt = self.prompt_template.format(question=question)
+        
+        return {
+            "prompt": prompt,
+            "question": question,
+            "context": question,
+            "labels": answer,
         }
 
 
@@ -769,6 +802,7 @@ TASK_MAPPING = {
     "squality": Squality,
     "triviaqa": TriviaQA,
     "truthfulqa": TruthfulQA,
+    "aime": AIME
 }
 
 

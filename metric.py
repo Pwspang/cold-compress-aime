@@ -6,6 +6,7 @@ import regex as re
 from claudette import Chat, models
 from evaluate import load
 from anthropic import RateLimitError
+from utils import extract_answer
 import regex as re
 
 
@@ -76,6 +77,17 @@ class Accuracy(Metric):
     def compute(self, prompts, predictions, references):
         return self.metric(references, predictions)
 
+
+class AIMEAccuracy(Accuracy):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def compute(self, prompts, predictions, references):
+        predictions = [extract_answer(prediction) for prediction in predictions]
+        references = [reference for reference in references]
+        
+        print(predictions, references)
+        return super().compute(prompts, references, predictions)
 
 class ExactMatchScore(Metric):
     def __init__(self, **kwargs):
@@ -308,6 +320,7 @@ METRIC_MAPPING = {
     "llm-as-a-judge": LLMJudge,
     "rouge": Rouge,
     "ruler-string-match": RulerStringMatch,
+    "AIME-Accuracy": AIMEAccuracy,
 }
 
 
@@ -324,14 +337,14 @@ class AutoMetric:
 
 
 if __name__ == "__main__":
-    metric = AutoMetric.from_name("llm-as-a-judge")
+    metric = AutoMetric.from_name("AIME-Accuracy")
     predictions = [
-        "The answer to 2x2 is 4.",
-        "The answer to 2x2 is 5.",
+        r"The answer to 2x2 is \\boxed{4}.",
+        r"The answer to 2x2 is \\boxed{5}.",
     ]
     labels = [["4"], ["4"]]
     prompts = [
         "What is 2x2?",
         "What is 2x2?",
     ]
-    print(metric.compute(prompts=prompts, predictions=predictions, labels=None))
+    print(metric.compute(prompts=prompts, predictions=predictions, references=labels))
