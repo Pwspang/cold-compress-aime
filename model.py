@@ -179,7 +179,20 @@ transformer_configs = {
         rope_base=1000000,
         attention_bias=True,
         norm_eps=1e-6,
-        max_length=131072,
+        max_length=32768,
+    ),
+    "DeepSeek-R1-Distill-Qwen7B": dict(
+        block_size=131072,
+        n_layer=28,
+        n_head=28,
+        n_local_heads=4,
+        dim=3584,
+        intermediate_size=18944,
+        vocab_size=152064,
+        rope_base=1000000,
+        attention_bias=True,
+        norm_eps=1e-6,
+        max_length=32768,
     ),
 }
 
