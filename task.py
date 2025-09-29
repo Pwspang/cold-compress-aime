@@ -261,12 +261,11 @@ class TriviaQA(EvaluationTask):
 
 class AIME(EvaluationTask):
     DEFAULT_PROMPT_TEMPLATE = """Please reason step by step, and put your final answer within \\\\boxed{{}}
-====Question====
 {question}"""
 
     def __init__(
         self,
-        prompt_template=DEFAULT_PROMPT_TEMPLATE, max_tokens=32768, **kwargs
+        prompt_template=DEFAULT_PROMPT_TEMPLATE, max_tokens=4096, **kwargs
     ):
         super().__init__(
             prompt_template,
@@ -281,6 +280,37 @@ class AIME(EvaluationTask):
     
     def prepare_row(self, row:dict):
         question = row["question"]
+        answer = row["answer"]
+        
+        prompt = self.prompt_template.format(question=question)
+        
+        return {
+            "prompt": prompt,
+            "question": question,
+            "context": question,
+            "labels": answer,
+        }
+
+class Math500(EvaluationTask):
+    DEFAULT_PROMPT_TEMPLATE = """Please reason step by step, and put your final answer within \\\\boxed{{}}
+{question}"""
+    def __init__(
+        self,
+        prompt_template=DEFAULT_PROMPT_TEMPLATE, max_tokens=100, **kwargs
+    ):
+        super().__init__(
+            prompt_template,
+            max_tokens,
+            hf_args=["HuggingFaceH4/MATH-500"],
+            **kwargs
+        )
+        
+        self.metrics = {
+            "Accuracy": AutoMetric.from_name("MATH500-Accuracy")
+        }
+    
+    def prepare_row(self, row:dict):
+        question = row["problem"]
         answer = row["answer"]
         
         prompt = self.prompt_template.format(question=question)
@@ -802,7 +832,8 @@ TASK_MAPPING = {
     "squality": Squality,
     "triviaqa": TriviaQA,
     "truthfulqa": TruthfulQA,
-    "aime": AIME
+    "aime": AIME,
+    "math500": Math500
 }
 
 

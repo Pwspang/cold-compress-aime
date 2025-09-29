@@ -140,8 +140,8 @@ def greedy(logits, next_token):
     else:
         idx_next = next_token
     return idx_next, probs
-
-
+    
+    
 def prefill(
     model: Transformer,
     x: torch.Tensor,

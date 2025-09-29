@@ -6,7 +6,7 @@ import regex as re
 from claudette import Chat, models
 from evaluate import load
 from anthropic import RateLimitError
-from utils import extract_answer
+from utils import extract_answer, extract_box
 import regex as re
 
 
@@ -84,6 +84,17 @@ class AIMEAccuracy(Accuracy):
 
     def compute(self, prompts, predictions, references):
         predictions = [extract_answer(prediction) for prediction in predictions]
+        references = [reference for reference in references]
+        
+        print(predictions, references)
+        return super().compute(prompts, references, predictions)
+
+class MATH500Accuracy(Accuracy):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def compute(self, prompts, predictions, references):
+        predictions = [extract_box(prediction) for prediction in predictions]
         references = [reference for reference in references]
         
         print(predictions, references)
@@ -321,6 +332,7 @@ METRIC_MAPPING = {
     "rouge": Rouge,
     "ruler-string-match": RulerStringMatch,
     "AIME-Accuracy": AIMEAccuracy,
+    "MATH500-Accuracy": MATH500Accuracy,
 }
 
 
@@ -337,14 +349,12 @@ class AutoMetric:
 
 
 if __name__ == "__main__":
-    metric = AutoMetric.from_name("AIME-Accuracy")
+    metric = AutoMetric.from_name("MATH500-Accuracy")
     predictions = [
-        r"The answer to 2x2 is \\boxed{4}.",
-        r"The answer to 2x2 is \\boxed{5}.",
+        r'Isolating $\\tan x^\\circ,$ we find\n\\begin{align*}\n\\tan x &= \\frac{\\tan 53^\\circ + \\tan 81^\\circ}{\\tan 53^\\circ \\tan 81^\\circ - 1} \\\\\n&= -\\frac{\\tan 53^\\circ + \\tan 81^\\circ}{1 - \\tan 53^\\circ \\tan 81^\\circ}.\n\\end{align*}From the angle addition formula, this is equal to\n\\[-\\tan (53^\\circ + 81^\\circ) = -\\tan 134^\\circ = \\tan 46^\\circ.\\]Therefore, $x = \\boxed{46}.$'
     ]
-    labels = [["4"], ["4"]]
+    labels = [["4"]]
     prompts = [
-        "What is 2x2?",
         "What is 2x2?",
     ]
     print(metric.compute(prompts=prompts, predictions=predictions, references=labels))

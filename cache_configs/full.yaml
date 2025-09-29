@@ -1,3 +1,4 @@
 cache_strategy: ["full"]
 prompt_compression_strategy: ["full"]
-tasks: ['aime']
+tasks: ['math500']
+num_samples: 5
